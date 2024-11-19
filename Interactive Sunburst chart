@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Car Models Ground Clearance</title>
+    <!-- Include the amCharts libraries -->
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+    <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+        
+        #chartdiv {
+          width: 1050px;
+          height: 950px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chartdiv"></div>
+    <script>
+    // Helper function to lighten a color
+    function lightenColor(hex, percent) {
+      const num = parseInt(hex.slice(1), 16),
+        amt = Math.round(2.55 * percent),
+        R = (num >> 16) + amt,
+        G = (num >> 8 & 0x00FF) + amt,
+        B = (num & 0x0000FF) + amt;
+      return \`#\${(
+        0x1000000 +
+        (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+        (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+        (B < 255 ? (B < 1 ? 0 : B) : 255)
+      ).toString(16).slice(1)}\`;
+    }
+    
+    var root = am5.Root.new("chartdiv");
+    
+    // Create custom theme
+    var myTheme = am5.Theme.new(root);
+    
+    // Set global font family
+    myTheme.rule("Label").setAll({
+      fontFamily: "Times New Roman",
+      fontSize: 11
+    });
+    
+    myTheme.rule("Text").setAll({
+      fontFamily: "Times New Roman"
+    });
+    
+    // Apply themes
+    root.setThemes([
+      am5themes_Animated.new(root),
+      myTheme
+    ]);
+    
+    var container = root.container.children.push(
+      am5.ZoomableContainer.new(root, {
+        width: am5.p100,
+        height: am5.p100,
+        wheelable: true,
+        pinchZoom: true
+      })
+    );
+    
+    var zoomTools = container.children.push(am5.ZoomTools.new(root, { target: container }));
+    
+    // Title with Times New Roman explicitly set
+    var title = container.contents.children.push(am5.Label.new(root, {
+      text: "CAR MODELS\\n[#63bdc5]GROUND CLEARANCE",
+      textAlign: "center",
+      x: am5.p50,
+      y: am5.p50,
+      centerX: am5.p50,
+      centerY: am5.p50,
+      fontSize: 18,
+      fontWeight: "500",
+      fill: am5.color(0x385d63),
+      fontFamily: "Times New Roman"  // Explicitly set
+    }));
+    
+    // Create series
+    var series = container.contents.children.push(am5hierarchy.Sunburst.new(root, {
+      singleBranchOnly: true,
+      downDepth: 3,
+      initialDepth: 5,
+      topDepth: 1,
+      innerRadius: 100,
+      valueField: "value",
+      categoryField: "name",
+      childDataField: "children"
+    }));
+    
+    series.nodes.template.setAll({
+      tooltipText: "{category}: {value} meters",
+      fontFamily: "Times New Roman"  // Add font family to nodes
+    });
+    
+    series.slices.template.setAll({
+      templateField: "nodeSettings",
+      fillOpacity: 1,
+      strokeOpacity: 1,
+      stroke: am5.color(0xffffff),
+      strokeWidth: 1
+    });
+    
+    series.labels.template.setAll({
+      rotation: "auto",  // This makes labels follow their arc
+      textType: "radial",  // Makes text follow the radius
+      centerX: am5.p150,
+      centerY: am5.p150,
+      fontSize: 11,
+      fontFamily: "Times New Roman"
+    });
+    
+    // Vehicle type colors
+    var vehicleTypeColors = {
+      "Sedan/Compact": "#432E54",
+      "SUV (Compact)": "#3B1C32",
+      "SUV (Midsize/Luxury)": "#C63C51",
+      "Pickup Truck": "#C84B31",
+      "4WD": "#1A3636",
+      "Full-Size Vans": "#0D7377",
+      "Compact/Mini Vans": "#393E46",
+      "Minivan": "#5432D3",
+      "Bus (City/Coach)": "#84142D"
+    };
+    
+    // Source data organized by vehicle type and brand
+    const sourceData = {
+      "Sedan/Compact": {
+        "Audi": ["A4", 0.122, "A6", 0.124, "A7", 0.127],
+        "BMW": ["3 Series", 0.145, "5 Series", 0.160],
+        "Ford": ["Mustang", 0.1346, "Fusion", 0.14, "Focus", 0.119],
+        "Honda": ["Accord", 0.1473, "Civic", 0.1702],
+        "Hyundai": ["Elantra", 0.140, "Sonata", 0.135],
+        "Mazda": ["Mazda3 Hatchback", 0.1397, "Mazda3 Sedan", 0.1397],
+        "Mercedes-Benz": ["A-Class", 0.104, "C-Class", 0.114, "E-Class", 0.122, "S-Class", 0.137],
+        "Tesla": ["Model 3", 0.14, "Model S", 0.117],
+        "Toyota": ["Camry", 0.145, "Corolla", 0.135, "Crown", 0.147],
+        "Volkswagen": ["Jetta", 0.132, "Arteon", 0.137]
+      },
+      "SUV (Compact)": {
+        "Chevrolet": ["Equinox", 0.193],
+        "Ford": ["Escape", 0.180, "Bronco Sport", 0.203],
+        "Honda": ["CR-V", 0.1981, "HR-V", 0.185],
+        "Hyundai": ["Kona", 0.17, "Tucson", 0.211],
+        "Kia": ["Sportage", 0.2108, "Seltos", 0.185],
+        "Mazda": ["CX-30", 0.203, "CX-5", 0.193, "CX-50", 0.218],
+        "Nissan": ["Rogue", 0.211],
+        "Subaru": ["Crosstrek", 0.220, "Forester", 0.221],
+        "Tesla": ["Model Y", 0.167],
+        "Toyota": ["Corolla Cross", 0.208, "RAV4", 0.213],
+        "Volkswagen": ["Taos", 0.208, "Tiguan", 0.201]
+      },
+      "SUV (Midsize/Luxury)": {
+        "Audi": ["Q5", 0.208, "Q7", 0.211],
+        "Acura": ["MDX", 0.185],
+        "BMW": ["X3", 0.203, "X5", 0.221],
+        "Buick": ["Enclave", 0.203],
+        "Chevrolet": ["Suburban", 0.254, "Tahoe", 0.203],
+        "Ford": ["Explorer", 0.211],
+        "Genesis": ["GV70", 0.185, "GV80", 0.203],
+        "Honda": ["Passport", 0.206, "Pilot", 0.185],
+        "Hyundai": ["IONIQ 5", 0.160, "Santa Fe", 0.208],
+        "Jeep": ["Grand Cherokee", 0.2184],
+        "Kia": ["EV6", 0.160, "Sorento", 0.208, "Telluride", 0.203],
+        "Lexus": ["RX", 0.208],
+        "Mazda": ["CX-90", 0.211],
+        "Mercedes-Benz": ["GLC", 0.150, "GLE", 0.180],
+        "Nissan": ["Pathfinder", 0.178],
+        "Toyota": ["4Runner", 0.244, "Highlander", 0.203],
+        "Volkswagen": ["Atlas", 0.203]
+      },
+      "Pickup Truck": {
+        "Chevrolet": ["Colorado", 0.211, "Colorado ZR2", 0.254, "Silverado 1500", 0.206, "Silverado Trail Boss", 0.277],
+        "Ford": ["F-150", 0.224, "F-150 Raptor", 0.305, "Ranger", 0.226, "Super Duty", 0.2159],
+        "GMC": ["Canyon", 0.211, "Sierra 1500", 0.206, "Sierra AT4", 0.259],
+        "Honda": ["Ridgeline", 0.193],
+        "Jeep": ["Gladiator", 0.254],
+        "Nissan": ["Frontier", 0.226, "Titan", 0.249],
+        "Ram": ["1500", 0.221, "2500", 0.231, "1500 Rebel", 0.262, "2500 Power Wagon", 0.366],
+        "Rivian": ["R1T", 0.38],
+        "Toyota": ["Tacoma", 0.239, "Tundra", 0.269]
+      },
+      "4WD": {
+        "Ford": ["Bronco", 0.295, "Bronco Raptor", 0.332, "F-150 Raptor", 0.333],
+        "GMC": ["Sierra AT4", 0.274],
+        "Jeep": ["Wrangler", 0.274],
+        "Land Rover": ["Defender", 0.292],
+        "Nissan": ["Frontier PRO-4X", 0.249],
+        "Tesla": ["Cybertruck", 0.400],
+        "Toyota": ["4Runner TRD Pro", 0.264, "Land Cruiser", 0.226]
+      },
+      "Full-Size Vans": {
+        "Ford": ["Transit", 0.152],
+        "Chevrolet": ["Express", 0.2057],
+        "Mercedes-Benz": ["Sprinter", 0.175]
+      },
+      "Compact/Mini Vans": {
+        "Ford": ["Transit Connect", 0.145],
+        "Mercedes-Benz": ["Metris", 0.137],
+        "Ram": ["ProMaster City", 0.140]
+      },
+      "Minivan": {
+        "Honda": ["Odyssey", 0.1143],
+        "Toyota": ["Sienna", 0.1626]
+      },
+      "Bus (City/Coach)": {
+        "New Flyer": ["Xcelsior", 0.356],
+        "Gillig": ["Low Floor", 0.338],
+        "Nova Bus": ["LFS", 0.330],
+        "Prevost": ["H3-45", 0.318],
+        "MCI": ["J4500", 0.320],
+        "Van Hool": ["CX35", 0.315]
+      }
+    };
+    
+    // Define the desired order of vehicle types
+    const vehicleTypeOrder = [
+      "Sedan/Compact",
+      "SUV (Compact)",
+      "SUV (Midsize/Luxury)",
+      "Pickup Truck",
+      "4WD",
+      "Full-Size Vans",
+      "Compact/Mini Vans",
+      "Minivan",
+      "Bus (City/Coach)"
+    ];
+    
+    // Transform source data into hierarchy with controlled order
+    var data = [{
+      name: "Vehicle Types",
+      nodeSettings: { fill: am5.color(0x444444) },
+      children: vehicleTypeOrder.map(vehicleType => ({
+        name: vehicleType,
+        nodeSettings: { fill: am5.color(vehicleTypeColors[vehicleType]) },
+        children: Object.entries(sourceData[vehicleType]).map(([brand, models]) => ({
+          name: brand,
+          nodeSettings: { fill: am5.color(lightenColor(vehicleTypeColors[vehicleType], 10)) },
+          children: Array.from({ length: models.length / 2 }, (_, i) => ({
+            name: models[i * 2],
+            value: models[i * 2 + 1],
+            nodeSettings: { fill: am5.color(lightenColor(vehicleTypeColors[vehicleType], 17)) }
+          }))
+        }))
+      }))
+    }];
+    
+    // Set data and animate
+    series.data.setAll(data);
+    series.set("selectedDataItem", series.dataItems[0]);
+    
+    // Rotate the chart by setting the start angle
+    series.set(0, 0); // Adjust the angle as needed
+    
+    series.appear(1000, 100);
+    </script>
+</body>
+</html>
