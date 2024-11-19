@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunburst Chart</title>
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        #chart {
+            width: 90%;
+            max-width: 800px;
+            height: 90%;
+            max-height: 800px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Container for the chart -->
+    <div id="chart"></div>
+    <script>
+        // Define the data for the Sunburst chart
+        const data = [{
+            type: "sunburst",
+            labels: ["Vehicle Types", "Sedan/Compact", "SUV (Compact)", "Audi", "BMW", "Honda", "Toyota", "A4", "A6", "Civic", "RAV4"],
+            parents: ["", "Vehicle Types", "Vehicle Types", "Sedan/Compact", "Sedan/Compact", "SUV (Compact)", "SUV (Compact)", "Audi", "Audi", "Honda", "Toyota"],
+            values: [10, 5, 5, 2, 2, 3, 2, 1, 1, 2, 2],
+            branchvalues: "total" // Ensures proportional sizing
+        }];
+
+        // Define layout
+        const layout = {
+            margin: { t: 10, l: 10, r: 10, b: 10 },
+            sunburstcolorway: ["#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A"]
+        };
+
+        // Render the chart
+        Plotly.newPlot("chart", data, layout);
+    </script>
+</body>
+</html>
